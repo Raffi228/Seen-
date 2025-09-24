@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { JobSeekerSituation, Message, ResumeOutput } from '../types';
 
@@ -102,14 +101,17 @@ export const customizeResumeAndGreeting = async (baseResume: string, jobDescript
     ---
     
     **Instructions:**
-    1.  **Customize Resume:** Analyze the Job Description and rewrite the Base Resume. The new resume must:
+    1.  **Extract Company and Position:** First, identify the company name and the specific position/job title from the Job Description.
+    2.  **Customize Resume:** Analyze the Job Description and rewrite the Base Resume. The new resume must:
         - Emphasize the skills and experiences from the Base Resume that are most relevant to the Job Description.
         - Integrate keywords and terminology from the Job Description naturally.
         - Rephrase bullet points to highlight achievements and impact, aligning them with the requirements of the new role.
         - Maintain a professional tone and format.
         - The output should be a single block of text formatted with Markdown.
 
-    2.  **Write Greeting Message:** Based on the tailored resume and the Job Description, write a concise, professional, and attention-grabbing greeting message (less than 100 words) for the job application platform. This message should briefly introduce the candidate, highlight one or two key qualifications relevant to the role, and express enthusiasm.
+    3.  **Write Greeting Message:** Based on the tailored resume and the Job Description, write a greeting message following this template:
+        "您好，看了贵公司的岗位JD，对您发布的[岗位名称]岗位很感兴趣。我有[年限]的[核心经验]经验，具备[核心能力1]、[核心能力2]，擅长[技能]，有[项目/成就]的经验。与贵公司的岗位匹配度高，如果您觉得合适，可以回复一下，给您发我的简历和作品集，谢谢!"
+        - Fill in the bracketed parts using information from the Job Description and the candidate's resume. The message must be concise, professional, and under 150 words.
     `;
     
     const schema = {
@@ -121,9 +123,18 @@ export const customizeResumeAndGreeting = async (baseResume: string, jobDescript
         },
         greetingMessage: {
           type: Type.STRING,
-          description: "A short, compelling greeting message for the application. (in Chinese)"
+          description: "A compelling greeting message for the application, following the specified template. (in Chinese)"
+        },
+        companyName: {
+          type: Type.STRING,
+          description: "The name of the company from the job description. (in Chinese)"
+        },
+        positionName: {
+          type: Type.STRING,
+          description: "The name of the job position from the job description. (in Chinese)"
         }
-      }
+      },
+      required: ["customizedResume", "greetingMessage", "companyName", "positionName"]
     };
     
     const response = await ai.models.generateContent({
@@ -143,7 +154,9 @@ export const customizeResumeAndGreeting = async (baseResume: string, jobDescript
     console.error("Error customizing resume:", error);
     return {
       customizedResume: "生成定制化简历时出错，请检查输入内容并重试。",
-      greetingMessage: "生成打招呼消息时出错，请稍后重试。"
+      greetingMessage: "生成打招呼消息时出错，请稍后重试。",
+      companyName: "未知公司",
+      positionName: "未知岗位"
     };
   }
 };

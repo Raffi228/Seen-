@@ -1,12 +1,11 @@
-
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { CopyIcon, CheckIcon } from './IconComponents';
 
 interface ResumePreviewProps {
   content: string;
 }
 
-const ResumePreview: React.FC<ResumePreviewProps> = ({ content }) => {
+const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ content }, ref) => {
   const [copied, setCopied] = useState(false);
 
   // A simple markdown to HTML conversion for display
@@ -28,21 +27,22 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ content }) => {
 
 
   return (
-    <div className="relative bg-slate-50 border border-slate-200 p-6 rounded-lg max-h-[60vh] overflow-y-auto">
+    <div className="relative bg-slate-50 border border-slate-200 rounded-lg max-h-[60vh] overflow-y-auto">
        <button 
         onClick={handleCopy}
-        className="absolute top-4 right-4 bg-white text-slate-600 px-3 py-2 rounded-lg hover:bg-slate-100 transition shadow-sm border border-slate-200 flex items-center space-x-2"
+        className="absolute top-4 right-4 bg-white text-slate-600 px-3 py-2 rounded-lg hover:bg-slate-100 transition shadow-sm border border-slate-200 flex items-center space-x-2 z-10"
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
         <span>{copied ? '已复制!' : '复制内容'}</span>
       </button>
 
       <div
-        className="prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-slate-800"
+        ref={ref}
+        className="prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-slate-800 p-6 bg-white"
         dangerouslySetInnerHTML={{ __html: formatContent(content) }}
       />
     </div>
   );
-};
+});
 
 export default ResumePreview;
